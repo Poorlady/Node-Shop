@@ -2,20 +2,29 @@ const fs = require("fs");
 const path = require("path");
 
 const dirName = require("../helpers/path");
-const { dir } = require("console");
+
+const p = path.join(dirName, "data", "products.json");
+
+const readFile = (cb) => {
+  fs.readFile(p, (err, contentFile) => {
+    if (err) {
+      cb([]);
+    }
+    cb(JSON.parse(contentFile));
+  });
+};
 
 module.exports = class Product {
-  constructor(title) {
-    this.title = title;
+  constructor(product) {
+    this.title = product.title;
+    this.imageUrl = product.imageUrl;
+    this.price = product.price;
+    this.description = product.description;
   }
 
   save() {
-    const p = path.join(dirName, "data", "products.json");
-    fs.readFile(p, (err, contentFile) => {
-      let products = [];
-      if (!err) {
-        products = JSON.parse(contentFile);
-      }
+    this.id = Math.random().toString();
+    readFile((products) => {
       products.push(this);
       fs.writeFile(p, JSON.stringify(products), (err) => {
         console.log(err);
@@ -24,12 +33,13 @@ module.exports = class Product {
   }
 
   static fetchAll(cb) {
-    const p = path.join(dirName, "data", "products.json");
-    fs.readFile(p, (err, contentFile) => {
-      if (err) {
-        cb([]);
-      }
-      cb(JSON.parse(contentFile));
+    readFile(cb);
+  }
+
+  static findById(id, cb) {
+    readFile((products) => {
+      const item = products.find((product) => product.id == id);
+      cb(item);
     });
   }
 };

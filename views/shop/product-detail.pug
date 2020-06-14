@@ -1,0 +1,15 @@
+extends ../layouts/layout.pug
+
+block style
+    link(rel="stylesheet", href="/css/main.css")
+
+block content
+    main.centered
+        h1 #{product.title}
+        hr
+        .detail__image
+            img(src=product.imageUrl, alt=product.title)
+        h2 #{product.price}
+        p #{product.description}
+        include ../includes/add-cart.pug
+        
