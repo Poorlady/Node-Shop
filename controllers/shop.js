@@ -33,7 +33,40 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  res.render("shop/cart", { docTitle: "Your Cart", path: "/cart" });
+  Cart.fetchCart((cart) => {
+    Product.fetchAll((products) => {
+      const fullCart = [];
+      //loop through the products list and find the same id in cart
+      for (const product of products) {
+        const sameProduct = cart.products.find(
+          (item) => item.id === product.id
+        );
+        if (sameProduct) {
+          //if the product is same then modified to new object
+          const modifiedProduct = {
+            productData: product,
+            quantity: sameProduct.quantity,
+          };
+          fullCart.push(modifiedProduct);
+        }
+      }
+      // console.log(fullCart);
+      res.render("shop/cart", {
+        docTitle: "Your Cart",
+        path: "/cart",
+        cart: fullCart,
+      });
+    });
+  });
+};
+
+exports.postDeleteCartItem = (req, res, next) => {
+  const { productId } = req.body;
+  Product.findById(productId, (product) => {
+    console.log(product);
+    Cart.deleteProduct(productId, product.price);
+    res.redirect("/cart");
+  });
 };
 
 exports.postCart = (req, res, next) => {
